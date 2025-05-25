@@ -267,7 +267,7 @@ def nodeseek_comment(driver):
         driver.get(target_url)
         print("等待页面加载...")
         
-        # 获取初始帖子列表
+        # 获取帖子列表
         posts = WebDriverWait(driver, 30).until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, '.post-list-item'))
         )
@@ -275,9 +275,12 @@ def nodeseek_comment(driver):
         
         # 过滤掉置顶帖
         valid_posts = [post for post in posts if not post.find_elements(By.CSS_SELECTOR, '.pined')]
-        selected_posts = random.sample(valid_posts, min(20, len(valid_posts)))
         
-        # 存储已选择的帖子URL
+        # 随机选择最多20个帖子
+        num_posts = min(20, len(valid_posts))
+        selected_posts = random.sample(valid_posts, num_posts)
+        
+        # 获取帖子URL
         selected_urls = []
         for post in selected_posts:
             try:
@@ -286,57 +289,59 @@ def nodeseek_comment(driver):
             except:
                 continue
         
+        # 记录已评论的帖子
+        commented_urls = set()
         is_chicken_leg = False
         
-        # 使用URL列表进行操作
+        # 处理每个帖子
         for i, post_url in enumerate(selected_urls):
+            if post_url in commented_urls:
+                print(f"帖子 {post_url} 已评论，跳过")
+                continue
+                
             try:
-                print(f"正在处理第 {i+1} 个帖子")
+                print(f"正在处理第 {i+1} 个帖子: {post_url}")
                 driver.get(post_url)
                 
-                # 处理加鸡腿
-                if is_chicken_leg is False:
+                # 处理加鸡腿（假设已有函数）
+                if not is_chicken_leg:
                     is_chicken_leg = click_chicken_leg(driver)
                 
-                # 等待 CodeMirror 编辑器加载
+                # 等待编辑器加载
                 editor = WebDriverWait(driver, 30).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, '.CodeMirror'))
                 )
                 
-                # 点击编辑器区域获取焦点
+                # 输入随机评论
                 editor.click()
                 time.sleep(0.5)
-                input_text = random.choice(randomInputStr)
-
-                # 模拟输入
+                input_text = random.choice(randomInputStr)  # 假设 randomInputStr 已定义
                 actions = ActionChains(driver)
-                # 随机输入 randomInputStr
                 for char in input_text:
                     actions.send_keys(char)
                     actions.pause(random.uniform(0.1, 0.3))
                 actions.perform()
                 
-                # 等待一下确保内容已经输入
+                # 等待输入完成
                 time.sleep(2)
                 
-                # 使用更精确的选择器定位提交按钮
+                # 提交评论
                 submit_button = WebDriverWait(driver, 30).until(
-                 EC.element_to_be_clickable((By.XPATH, "//button[contains(@class, 'submit') and contains(@class, 'btn') and contains(text(), '发布评论')]"))
+                    EC.element_to_be_clickable((By.XPATH, "//button[contains(@class, 'submit') and contains(@class, 'btn') and contains(text(), '发布评论')]"))
                 )
-                # 确保按钮可见并可点击
                 driver.execute_script("arguments[0].scrollIntoView(true);", submit_button)
                 time.sleep(0.5)
                 submit_button.click()
                 
                 print(f"已在帖子 {post_url} 中完成评论")
+                commented_urls.add(post_url)  # 记录已评论
                 
                 # 返回交易区
-                # driver.get(target_url)
-                # time.sleep(2)  # 等待页面加载
-                time.sleep(random.uniform(2,5))
+                driver.get(target_url)
+                time.sleep(random.uniform(2, 5))
                 
             except Exception as e:
-                print(f"处理帖子时出错: {str(e)}")
+                print(f"处理帖子 {post_url} 时出错: {str(e)}")
                 continue
                 
         print("NodeSeek评论任务完成")
