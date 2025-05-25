@@ -1,3 +1,4 @@
+
 # -- coding: utf-8 --
 """
 Copyright (c) 2024 [Hosea]
@@ -304,8 +305,8 @@ def nodeseek_comment(driver):
                 driver.get(post_url)
                 
                 # 处理加鸡腿（假设已有函数）
-                #if not is_chicken_leg:
-                 #   is_chicken_leg = click_chicken_leg(driver)
+                if not is_chicken_leg:
+                    is_chicken_leg = click_chicken_leg(driver)
                 
                 # 等待编辑器加载
                 editor = WebDriverWait(driver, 30).until(
