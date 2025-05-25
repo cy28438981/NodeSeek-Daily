@@ -5,7 +5,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: '0 16 * * *' # 每天 UTC 16:00（北京时间 00:00）
+    - cron: '0 00 * * *' # 每天 UTC 16:00（北京时间 08:00）
   workflow_dispatch: # 支持手动触发
 
 jobs:
