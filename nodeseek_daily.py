@@ -346,7 +346,7 @@ def nodeseek_comment(driver):
         
         # 记录已评论的帖子
         commented_urls = set()
-        is_chicken_leg = False
+        is_chicken_leg = True
         
         # 处理每个帖子
         for i, post_url in enumerate(selected_urls):
