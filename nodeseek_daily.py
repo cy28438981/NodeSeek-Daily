@@ -152,11 +152,20 @@ def setup_driver_and_cookies():
             options.add_argument('--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
         
         print("正在启动Chrome...")
-        # 强制匹配 Chrome 137，并添加错误处理
         try:
             driver = uc.Chrome(options=options, version_main=137)
         except Exception as e:
             print(f"ChromeDriver 启动失败: {str(e)}. 尝试使用自动匹配版本...")
+            # 创建新的 ChromeOptions 对象
+            options = uc.ChromeOptions()
+            options.add_argument('--no-sandbox')
+            options.add_argument('--disable-dev-shm-usage')
+            if headless:
+                options.add_argument('--headless')
+                options.add_argument('--disable-blink-features=AutomationControlled')
+                options.add_argument('--disable-gpu')
+                options.add_argument('--window-size=1920,1080')
+                options.add_argument('--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
             driver = uc.Chrome(options=options)  # 自动匹配版本
         
         if headless:
@@ -193,7 +202,7 @@ def setup_driver_and_cookies():
         print("详细错误信息:")
         print(traceback.format_exc())
         return None
-
+        
 def nodeseek_comment(driver):
     try:
         print("正在访问交易区...")
