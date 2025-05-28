@@ -29,6 +29,9 @@ jobs:
       - name: Add Google Chrome repository and install Chrome
         run: |
           sudo apt-get update
+          # 移除任何已安装的 Chromium 或 Chrome
+          sudo apt-get purge -y chromium-browser google-chrome-stable || true
+          sudo apt-get autoremove -y
           # 安装依赖
           sudo apt-get install -y wget gnupg ca-certificates
           # 添加 Google Chrome 存储库
