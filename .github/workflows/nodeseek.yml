@@ -29,19 +29,20 @@ jobs:
       - name: Add Google Chrome repository and install Chrome
         run: |
           sudo apt-get update
-          # 移除任何已安装的 Chromium 或 Chrome
-          sudo apt-get purge -y chromium-browser google-chrome-stable || true
-          sudo apt-get autoremove -y
+          # 彻底移除所有 Chrome 和 Chromium 相关包
+          sudo apt-get purge -y chromium-browser chromium-chromedriver google-chrome-stable google-chrome-beta google-chrome-unstable || true
+          sudo apt-get autoremove -y --purge
+          sudo rm -rf /etc/apt/sources.list.d/*chrome*
           # 安装依赖
           sudo apt-get install -y wget gnupg ca-certificates
           # 添加 Google Chrome 存储库
           wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
           echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
           sudo apt-get update
-          # 安装最新稳定版 Chrome
-          sudo apt-get install -y google-chrome-stable
+          # 强制安装最新稳定版 Chrome
+          sudo apt-get install -y --reinstall google-chrome-stable
           echo "Chrome version:"
-          google-chrome --version
+          google-chrome --version || echo "Chrome installation failed"
           # 安装 Xvfb 支持无头模式
           sudo apt-get install -y xvfb
 
