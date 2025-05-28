@@ -26,12 +26,17 @@ jobs:
           rm -rf ~/.cache/pip
           rm -rf ~/.cache/undetected-chromedriver
 
-      - name: Install Chrome 137
+      - name: Add Google Chrome repository and install Chrome
         run: |
           sudo apt-get update
-          sudo apt-get purge chromium-browser chromium-chromedriver -y
-          wget https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_137.0.7151.41-1_amd64.deb
-          sudo apt-get install -y ./google-chrome-stable_137.0.7151.41-1_amd64.deb
+          # 安装依赖
+          sudo apt-get install -y wget gnupg ca-certificates
+          # 添加 Google Chrome 存储库
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
+          # 安装最新稳定版 Chrome
+          sudo apt-get install -y google-chrome-stable
           echo "Chrome version:"
           google-chrome --version
           # 安装 Xvfb 支持无头模式
@@ -40,7 +45,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install --force-reinstall undetected-chromedriver==3.5.5  # 强制安装支持 Chrome 137 的版本
+          pip install --force-reinstall undetected-chromedriver==3.5.5
           pip install -r requirements.txt
 
       - name: Run NodeSeek script
@@ -49,5 +54,4 @@ jobs:
           NS_RANDOM: ${{ secrets.NS_RANDOM }}
           HEADLESS: "true"
         run: |
-          # 启动 Xvfb 以支持无头模式
           xvfb-run -a python nodeseek_daily.py
