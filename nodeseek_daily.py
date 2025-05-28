@@ -1,4 +1,3 @@
-
 # -- coding: utf-8 --
 """
 Copyright (c) 2024 [Hosea]
@@ -17,12 +16,10 @@ import undetected_chromedriver as uc
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 
-ns_random = os.environ.get("NS_RANDOM","false")
+ns_random = os.environ.get("NS_RANDOM", "false")
 cookie = os.environ.get("NS_COOKIE") or os.environ.get("COOKIE")
 # 通过环境变量控制是否使用无头模式，默认为 True（无头模式）
 headless = os.environ.get("HEADLESS", "true").lower() == "true"
-
-# ... (其他代码保持不变)
 
 randomInputStr = [
     ":xhj001:",
@@ -75,23 +72,17 @@ def click_sign_icon(driver):
     """
     try:
         print("开始查找签到图标...")
-        # 使用更精确的选择器定位签到图标
         sign_icon = WebDriverWait(driver, 30).until(
             EC.presence_of_element_located((By.XPATH, "//span[@title='签到']"))
         )
         print("找到签到图标，准备点击...")
         
-        # 确保元素可见和可点击
         driver.execute_script("arguments[0].scrollIntoView(true);", sign_icon)
         time.sleep(0.5)
         
-        # 打印元素信息
         print(f"签到图标元素: {sign_icon.get_attribute('outerHTML')}")
         
-        # 尝试点击
         try:
-            
-            
             sign_icon.click()
             print("签到图标点击成功")
         except Exception as click_error:
@@ -101,24 +92,24 @@ def click_sign_icon(driver):
         print("等待页面跳转...")
         time.sleep(5)
         
-        # 打印当前URL
         print(f"当前页面URL: {driver.current_url}")
         
-        # 点击"试试手气"按钮
         try:
-            click_button:None
-            
-            if ns_random:
+            click_button = None
+            if ns_random.lower() == "true":
                 click_button = WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), '试试手气')]"))
-            )
+                    EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), '试试手气')]"))
+                )
             else:
                 click_button = WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), '鸡腿 x 5')]"))
-            )
+                    EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), '鸡腿 x 5')]"))
+                )
             
-            click_button.click()
-            print("完成试试手气点击")
+            if click_button:
+                click_button.click()
+                print("完成试试手气点击")
+            else:
+                print("未找到试试手气按钮")
         except Exception as lucky_error:
             print(f"试试手气按钮点击失败或者签到过了: {str(lucky_error)}")
             
@@ -155,18 +146,20 @@ def setup_driver_and_cookies():
         if headless:
             print("启用无头模式...")
             options.add_argument('--headless')
-            # 添加以下参数来绕过 Cloudflare 检测
             options.add_argument('--disable-blink-features=AutomationControlled')
             options.add_argument('--disable-gpu')
             options.add_argument('--window-size=1920,1080')
-            # 设置 User-Agent
             options.add_argument('--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
         
         print("正在启动Chrome...")
-        driver = uc.Chrome(options=options,version_main=137)
+        # 强制匹配 Chrome 137，并添加错误处理
+        try:
+            driver = uc.Chrome(options=options, version_main=137)
+        except Exception as e:
+            print(f"ChromeDriver 启动失败: {str(e)}. 尝试使用自动匹配版本...")
+            driver = uc.Chrome(options=options)  # 自动匹配版本
         
         if headless:
-            # 执行 JavaScript 来修改 webdriver 标记
             driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
             driver.set_window_size(1920, 1080)
         
@@ -174,9 +167,7 @@ def setup_driver_and_cookies():
         
         print("正在设置cookie...")
         driver.get('https://www.nodeseek.com')
-        
-        # 等待页面加载完成
-        time.sleep(5)
+        time.sleep(5)  # 确保页面加载
         
         for cookie_item in cookie.split(';'):
             try:
@@ -210,20 +201,15 @@ def nodeseek_comment(driver):
         driver.get(target_url)
         print("等待页面加载...")
         
-        # 获取帖子列表
         posts = WebDriverWait(driver, 30).until(
             EC.presence_of_all_elements_located((By.CSS_SELECTOR, '.post-list-item'))
         )
         print(f"成功获取到 {len(posts)} 个帖子")
         
-        # 过滤掉置顶帖
         valid_posts = [post for post in posts if not post.find_elements(By.CSS_SELECTOR, '.pined')]
-        
-        # 随机选择最多20个帖子
         num_posts = min(20, len(valid_posts))
         selected_posts = random.sample(valid_posts, num_posts)
         
-        # 获取帖子URL
         selected_urls = []
         for post in selected_posts:
             try:
@@ -232,11 +218,9 @@ def nodeseek_comment(driver):
             except:
                 continue
         
-        # 记录已评论的帖子
         commented_urls = set()
         is_chicken_leg = True
         
-        # 处理每个帖子
         for i, post_url in enumerate(selected_urls):
             if post_url in commented_urls:
                 print(f"帖子 {post_url} 已评论，跳过")
@@ -246,29 +230,24 @@ def nodeseek_comment(driver):
                 print(f"正在处理第 {i+1} 个帖子: {post_url}")
                 driver.get(post_url)
                 
-                # 处理加鸡腿（假设已有函数）
                 if not is_chicken_leg:
                     is_chicken_leg = click_chicken_leg(driver)
                 
-                # 等待编辑器加载
                 editor = WebDriverWait(driver, 30).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, '.CodeMirror'))
                 )
                 
-                # 输入随机评论
                 editor.click()
                 time.sleep(0.5)
-                input_text = random.choice(randomInputStr)  # 假设 randomInputStr 已定义
+                input_text = random.choice(randomInputStr)
                 actions = ActionChains(driver)
                 for char in input_text:
                     actions.send_keys(char)
                     actions.pause(random.uniform(0.1, 0.3))
                 actions.perform()
                 
-                # 等待输入完成
                 time.sleep(2)
                 
-                # 提交评论
                 submit_button = WebDriverWait(driver, 30).until(
                     EC.element_to_be_clickable((By.XPATH, "//button[contains(@class, 'submit') and contains(@class, 'btn') and contains(text(), '发布评论')]"))
                 )
@@ -277,9 +256,7 @@ def nodeseek_comment(driver):
                 submit_button.click()
                 
                 print(f"已在帖子 {post_url} 中完成评论")
-                commented_urls.add(post_url)  # 记录已评论
-                
-                # 返回交易区
+                commented_urls.add(post_url)
                 driver.get(target_url)
                 time.sleep(random.uniform(2, 5))
                 
@@ -305,12 +282,10 @@ def click_chicken_leg(driver):
         chicken_btn.click()
         print("加鸡腿按钮点击成功")
         
-        # 等待确认对话框出现
         WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, '.msc-confirm'))
         )
         
-        # 检查是否是7天前的帖子
         try:
             error_title = driver.find_element(By.XPATH, "//h3[contains(text(), '该评论创建于7天前')]")
             if error_title:
@@ -324,12 +299,11 @@ def click_chicken_leg(driver):
             )
             ok_btn.click()
             print("确认加鸡腿成功")
-            
-        # 等待确认对话框消失
+        
         WebDriverWait(driver, 5).until_not(
             EC.presence_of_element_located((By.CSS_SELECTOR, '.msc-overlay'))
         )
-        time.sleep(1)  # 额外等待以确保对话框完全消失
+        time.sleep(1)
         
         return True
         
@@ -346,6 +320,3 @@ if __name__ == "__main__":
     nodeseek_comment(driver)
     click_sign_icon(driver)
     print("脚本执行完成")
-    # while True:
-    #     time.sleep(1)
-
