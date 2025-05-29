@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - main
-  schedule:
-    - cron: '0 00 * * *' # 每天 UTC 16:00（北京时间 08:00）
+  #schedule:
+   # - cron: '0 00 * * *' # 每天 UTC 16:00（北京时间 08:00）
   workflow_dispatch: # 支持手动触发
 
 jobs:
@@ -29,6 +29,9 @@ jobs:
       - name: Add Google Chrome repository and install Chrome
         run: |
           sudo apt-get update
+          # 列出当前环境中已安装的 Chrome/Chromium
+          echo "Checking for existing Chrome/Chromium installations..."
+          dpkg -l | grep -E 'chromium|google-chrome' || echo "No Chrome/Chromium found"
           # 彻底移除所有 Chrome 和 Chromium 相关包
           sudo apt-get purge -y chromium-browser chromium-chromedriver google-chrome-stable google-chrome-beta google-chrome-unstable || true
           sudo apt-get autoremove -y --purge
@@ -41,8 +44,11 @@ jobs:
           sudo apt-get update
           # 强制安装最新稳定版 Chrome
           sudo apt-get install -y --reinstall google-chrome-stable
-          echo "Chrome version:"
+          echo "Chrome version after installation:"
           google-chrome --version || echo "Chrome installation failed"
+          # 查找 Chrome 可执行文件路径
+          echo "Chrome binary path:"
+          which google-chrome || echo "Chrome binary not found"
           # 安装 Xvfb 支持无头模式
           sudo apt-get install -y xvfb
 
