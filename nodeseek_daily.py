@@ -64,6 +64,15 @@ randomInputStr = [
     "顶一个，加油！",
     "支持一下楼主！",
     "顶一个",
+    "B楼主D",
+    ":ac01:",
+    ":ac06:",
+    ":ac11:",
+    ":ac12:",
+    ":ac16:",
+    ":ac17:",
+    ":ac20:",
+    ":ac23:",
 ]
 
 def click_sign_icon(driver):
