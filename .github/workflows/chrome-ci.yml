@@ -1,40 +1,26 @@
-name: Chrome CI
+name: ChromeDriver CI
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+on: [push]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Remove default Chrome
-        run: sudo apt-get purge google-chrome-stable -y || true
+      - name: Set up Chrome Beta
+        uses: browser-actions/setup-chrome@latest
+        with:
+          channel: beta
 
-      - name: Install Chrome v137
+      - name: Install ChromeDriver manually for Chrome 137 beta
         run: |
-          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y
-          google-chrome --version
+          # 下载匹配 beta 版 Chrome 的驱动（请确认是137开头的版本）
+          wget https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/137.0.7225.0/linux64/chromedriver-linux64.zip
+          unzip chromedriver-linux64.zip
+          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
+          sudo chmod +x /usr/local/bin/chromedriver
 
-      - name: Install ChromeDriver v137
-        run: |
-          LATEST=$(curl -sSL https://chromedriver.storage.googleapis.com/LATEST_RELEASE_137)
-          wget https://chromedriver.storage.googleapis.com/$LATEST/chromedriver_linux64.zip
-          unzip chromedriver_linux64.zip
-          chmod +x chromedriver
-          sudo mv chromedriver /usr/local/bin/
-          chromedriver --version
-
-      - name: Run your tests
-        run: |
-          echo "Running tests..."
-          # 你可以替换下面命令为自己的测试命令
-          # npm ci
-          # npm run test
+      - name: Verify ChromeDriver version
+        run: chromedriver --version
