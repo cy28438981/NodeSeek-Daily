@@ -267,7 +267,7 @@ def nodeseek_comment(driver):
                 print(f"已在帖子 {post_url} 中完成评论")
                 commented_urls.add(post_url)
                 driver.get(target_url)
-                time.sleep(random.uniform(2, 5))
+                time.sleep(random.uniform(5, 15))
                 
             except Exception as e:
                 print(f"处理帖子 {post_url} 时出错: {str(e)}")
