@@ -152,6 +152,11 @@ def setup_driver_and_cookies():
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
         
+        # 明确指定 Chrome 可执行文件路径
+        chrome_binary = os.environ.get("CHROME_BINARY", "/usr/bin/google-chrome")
+        options.binary_location = chrome_binary
+        print(f"使用 Chrome 可执行文件路径: {chrome_binary}")
+        
         if headless:
             print("启用无头模式...")
             options.add_argument('--headless')
@@ -161,7 +166,6 @@ def setup_driver_and_cookies():
             options.add_argument('--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
         
         print("正在启动Chrome...")
-        # 移除 version_main，让 undetected-chromedriver 自动匹配
         driver = uc.Chrome(options=options)
         
         if headless:
