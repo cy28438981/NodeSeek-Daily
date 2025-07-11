@@ -210,7 +210,7 @@ def nodeseek_comment(driver):
         print(f"成功获取到 {len(posts)} 个帖子")
         
         valid_posts = [post for post in posts if not post.find_elements(By.CSS_SELECTOR, '.pined')]
-        num_posts = min(20, len(valid_posts))
+        num_posts = min(1, len(valid_posts)) #评论数量设置
         selected_posts = random.sample(valid_posts, num_posts)
         
         selected_urls = []
